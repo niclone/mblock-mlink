@@ -4,6 +4,16 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
     _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck")),
     _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass")),
     logger = require("../../logger"),
+    isMakeblock = function(e) {
+        return "string" == typeof e && 0 === e.indexOf("Makeblock_LE")
+    },
+    normalizeUuid = function(e) {
+        var r = String(e || "").toLowerCase().replace(/-/g, "");
+        return 32 === r.length && "0000" === r.substr(0, 4) ? r.substr(4, 4) : r
+    },
+    uuidEqual = function(e, r) {
+        return normalizeUuid(e) === normalizeUuid(r)
+    },
     Peripheral = function() {
         function n(e, r, t, i) {
             (0, _classCallCheck2.default)(this, n), this.noble = t, this.currentPort = e, this.options = r, this.writeCharacteristic = null, this.notifyCharacteristic = null, this.currentPeripheral = null, this.peripheralList = i
@@ -18,7 +28,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
                             return e.next = 2, _regenerator.default.awrap(this.__getperipheral(this.currentPort));
                         case 2:
                             return t = e.sent, this.bleName = t && t.advertisement && t.advertisement.localName, t.once("disconnect", function() {
-                                "Makeblock_LE" === n.bleName && r && r()
+                                isMakeblock(n.bleName) && r && r()
                             }), this.currentPeripheral = t, e.next = 8, _regenerator.default.awrap(this.__connectReal(t));
                         case 8:
                             return e.next = 10, _regenerator.default.awrap(this.__getCharacteristics(t, this.options));
@@ -67,7 +77,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
                 var n = this;
                 return new Promise(function(r, t) {
                     i.connect(function(e) {
-                        return e ? (logger.debug("connecting error", e), t("connect error")) : (logger.debug("Connected to", i.id), r(n.currentPort))
+                        return e ? (logger.debug("connecting error", e), t(e.message || e)) : (logger.debug("Connected to", i.id), r(n.currentPort))
                     })
                 })
             }
@@ -76,11 +86,11 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
             value: function(r, o) {
                 return new Promise(function(i, n) {
                     logger.debug("服务匹配。");
-                    var e = [o.serviceUUID];
+                    var e = [normalizeUuid(o.serviceUUID)];
                     r.discoverServices(e, function(e, r) {
                         if (logger.debug("服务callback.", e), e) return n(e);
                         if (0 === r.length) return n("not found service. ");
-                        var t = [o.writeProperty, o.notifyProperty];
+                        var t = [normalizeUuid(o.writeProperty), normalizeUuid(o.notifyProperty)];
                         r[0].discoverCharacteristics(t, function(e, r) {
                             if (logger.debug("特征值callback.", e), e) return n(e);
                             var t = {
@@ -88,7 +98,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
                                 notify: null
                             };
                             return r.forEach(function(e) {
-                                o.writeProperty === e.uuid && (t.write = e, logger.debug("discoverWriteService", e.uuid)), o.notifyProperty === e.uuid && (t.notify = e, logger.debug("discoverNotifyService", e.uuid))
+                                uuidEqual(o.writeProperty, e.uuid) && (t.write = e, logger.debug("discoverWriteService", e.uuid)), uuidEqual(o.notifyProperty, e.uuid) && (t.notify = e, logger.debug("discoverNotifyService", e.uuid))
                             }), i(t)
                         })
                     })
@@ -99,7 +109,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
             value: function(i, n) {
                 var o = this;
                 return new Promise(function(r, t) {
-                    var e = new Buffer(i, n);
+                    var e = Buffer.from(i, n);
                     logger.debug("write into", o.options), logger.debug("Sending: ", e), o.writeCharacteristic.write(e, !0, function(e) {
                         return e ? t(e) : r()
                     })
@@ -115,7 +125,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
         }, {
             key: "reportWriteIsNull",
             value: function() {
-                logger.debug("------ ".concat(this.bleName, " writeCharacteristic is null ------")), "Makeblock_LE" === this.bleName && (process.send({
+                logger.debug("------ ".concat(this.bleName, " writeCharacteristic is null ------")), isMakeblock(this.bleName) && (process.send({
                     method: "reportBleType",
                     connectName: this.currentPort,
                     type: "dualmode"
