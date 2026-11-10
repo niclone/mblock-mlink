@@ -2,6 +2,15 @@
 var log4js = require("log4js"),
     _require = require("./constant"),
     ROUTER = _require.ROUTER,
+    hasFlag = function(e) {
+        return process.argv.indexOf(e) !== -1
+    },
+    isDev = "dev" === process.env.NODE_ENV,
+    isVerbose = isDev || "1" === process.env.MLINK_VERBOSE || "true" === process.env.MLINK_LOG_CONSOLE || hasFlag("--verbose") || hasFlag("-v"),
+    requestedLevel = process.env.MLINK_LOG_LEVEL,
+    consoleLevel = requestedLevel || (isVerbose ? "debug" : "info"),
+    fileLevel = requestedLevel || "debug",
+    useConsole = isVerbose || !!requestedLevel,
     configure = {
         replaceConsole: !0,
         appenders: {
@@ -18,15 +27,15 @@ var log4js = require("log4js"),
         categories: {
             default: {
                 appenders: ["stdout"],
-                level: "debug"
+                level: consoleLevel
             },
             info: {
                 appenders: ["info"],
-                level: "debug"
+                level: fileLevel
             }
         }
     };
 log4js.configure(configure);
-var type = "dev" === process.env.NODE_ENV ? "default" : "info",
+var type = useConsole ? "default" : "info",
     logger = log4js.getLogger(type);
 module.exports = logger;
