@@ -4,6 +4,8 @@
   "description": "Multiplatform version of mblock-mlink",
   "main": "app.js",
   "scripts": {
+    "start": "node .",
+    "start:verbose": "node . --verbose",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -22,16 +24,21 @@
   },
   "homepage": "https://github.com/audetto/mblock-mlink#readme",
   "dependencies": {
-    "@babel/runtime": "^7.9.2",
-    "http-server": "^0.12.1",
-    "iconv-lite": "^0.4.24",
-    "log4js": "^6.1.2",
-    "moment": "^2.24.0",
-    "node-hid": "^1.2.0",
-    "node-wifi": "^2.0.12",
-    "open": "^7.0.3",
+    "@babel/runtime": "^7.28.4",
+    "@stoprocent/noble": "^2.8.0",
+    "dbus-next": "^0.10.2",
+    "http-server": "^14.1.1",
+    "iconv-lite": "^0.6.3",
+    "log4js": "^6.9.1",
+    "moment": "^2.30.1",
+    "node-hid": "^3.4.0",
+    "node-wifi": "^2.0.16",
+    "open": "^7.4.2",
     "save-file": "^2.3.1",
-    "serialport": "^7.1.5",
+    "serialport": "^13.0.0",
     "socket.io": "^2.5.0"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
