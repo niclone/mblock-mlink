@@ -99,7 +99,7 @@ var getPath = function(e) {
         return r
     },
     toBuffer = function(e) {
-        for (var r = new Buffer(e.byteLength), t = new Uint8Array(e), n = 0; n < r.length; ++n) r[n] = t[n];
+        for (var r = Buffer.alloc(e.byteLength), t = new Uint8Array(e), n = 0; n < r.length; ++n) r[n] = t[n];
         return r
     };
 module.exports = {

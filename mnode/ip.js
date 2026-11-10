@@ -1,19 +1,27 @@
 "use strict";
 var os = require("os"),
+    isIPv4 = function(r) {
+        return "IPv4" === r.family || 4 === r.family
+    },
     getNetInterface = function() {
         var r = os.networkInterfaces();
-        if (r.en0) return r.en0.find(function(r) {
-            return "IPv4" === r.family
-        }) || [];
-        for (var t in r) {
-            return r[t].find(function(r) {
-                return "IPv4" === r.family && !r.internal && "127.0.0.1" !== r.address
-            }) || []
+        if (r.en0) {
+            var t = r.en0.find(function(r) {
+                return isIPv4(r)
+            });
+            if (t) return t
         }
+        for (var n in r) {
+            var e = (r[n] || []).find(function(r) {
+                return isIPv4(r) && !r.internal && "127.0.0.1" !== r.address
+            });
+            if (e) return e
+        }
+        return []
     },
     getBroadcastAddress = function() {
         var r = getNetInterface();
-        if (r) {
+        if (r && r.address && r.netmask) {
             var t = r.address,
                 n = r.netmask,
                 e = t.split(".").map(function(r) {

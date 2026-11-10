@@ -27,7 +27,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
         }, {
             key: "send",
             value: function(e) {
-                var t = (new util.TextDecoder).decode(new Buffer(e));
+                var t = (new util.TextDecoder).decode(Buffer.from(e));
                 logger.debug("【".concat(this.udpid, "】send:"), t), this.instance.send(t, 0, t.length, this.port, this.hostname, function(e, t) {
                     e && logger.error(e)
                 })

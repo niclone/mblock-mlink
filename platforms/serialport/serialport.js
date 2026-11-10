@@ -2,7 +2,7 @@
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault"),
     _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck")),
     _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass")),
-    serialport = require("serialport"),
+    serialport = require("serialport").SerialPort,
     child_process = require("child_process"),
     channel = require("../../channel"),
     logger = require("../../logger"),
@@ -74,8 +74,10 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
         }, {
             key: "doGetDevices",
             value: function(e, t) {
-                serialport.list(function(e, r) {
-                    t.reply(e, r)
+                serialport.list().then(function(e) {
+                    t.reply(null, e)
+                }).catch(function(e) {
+                    t.reply(e && e.message ? e.message : String(e), [])
                 })
             }
         }, {
@@ -119,7 +121,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
                     data: t.data,
                     encode: t.encode,
                     messageId: r.messageId
-                }), logger.debug("> ".concat(this.response.io.id, ": -> [Write]"), new Buffer(t.data)), r.reply(null)
+                }), logger.debug("> ".concat(this.response.io.id, ": -> [Write]"), Buffer.from(t.data)), r.reply(null)
             }
         }, {
             key: "doFlush",
@@ -164,7 +166,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
                         case "error":
                             return t.response.push(t.getSerialportTarget(e.connectName), e.error, e.connectName), t.kill();
                         case "data":
-                            return logger.debug("> ".concat(t.response.io.id, ": <- [Read]"), new Buffer(e.data)), t.response.push(t.getSerialportTarget(e.connectName), null, e.connectName, e.data);
+                            return logger.debug("> ".concat(t.response.io.id, ": <- [Read]"), Buffer.from(e.data)), t.response.push(t.getSerialportTarget(e.connectName), null, e.connectName, e.data);
                         case "open":
                             return t.open(null, e.messageId)
                     }

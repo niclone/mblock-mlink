@@ -27,10 +27,18 @@ function _objectSpread(r) {
     return r
 }
 var currentPort, hidConnection, disconnectTimeId, hid = require("node-hid"),
+    path = require("path"),
+    child_process = require("child_process"),
     logger = require("../../logger"),
     enableHIDInLinux = function(e) {
         var r = path.join(__dirname, "linux-tool", "enableHID.sh");
-        _this.spawn("bash " + r, [], e)
+        child_process.spawn("bash", [r], {
+            stdio: "inherit"
+        }).on("error", function(r) {
+            e(r)
+        }).on("close", function(r) {
+            e(0 === r ? null : new Error("Cannot enable HID device, exit code: " + r))
+        })
     },
     checkDisconnect = function() {
         clearTimeout(disconnectTimeId), disconnectTimeId = clearTimeout(function() {
@@ -105,7 +113,7 @@ var currentPort, hidConnection, disconnectTimeId, hid = require("node-hid"),
         }, c))
     },
     writeData = function(e) {
-        for (var r = new Buffer(e), n = [0, r.length], t = 0; t < r.length; t++) n.push(r[t]);
+        for (var r = Buffer.from(e), n = [0, r.length], t = 0; t < r.length; t++) n.push(r[t]);
         try {
             hidConnection.write(n)
         } catch (e) {

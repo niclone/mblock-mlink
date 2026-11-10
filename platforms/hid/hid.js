@@ -92,7 +92,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
                     data: t.data,
                     encode: t.encode,
                     messageId: n.messageId
-                }), logger.debug("> ".concat(this.response.io.id, ": -> [Write]"), new Buffer(t.data)), n.reply(null)
+                }), logger.debug("> ".concat(this.response.io.id, ": -> [Write]"), Buffer.from(t.data)), n.reply(null)
             }
         }, {
             key: "open",
@@ -125,7 +125,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
                         case "error":
                             return s.response.push(s.getHidTarget(e.connectName), e.error, e.connectName, e.data, "onReceive", "hid"), s.kill();
                         case "data":
-                            return logger.debug("> ".concat(s.response.io.id, ": <- [Read]"), new Buffer(e.data)), s.response.push(s.getHidTarget(e.connectName), null, e.connectName, e.data, "onReceive", "hid");
+                            return logger.debug("> ".concat(s.response.io.id, ": <- [Read]"), Buffer.from(e.data)), s.response.push(s.getHidTarget(e.connectName), null, e.connectName, e.data, "onReceive", "hid");
                         case "open":
                             return s.open(null, e.messageId)
                     }

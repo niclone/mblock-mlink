@@ -44,7 +44,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
             key: "_firmwareBinFile",
             value: function(e) {
                 try {
-                    helper.existsSync(TEMP_PATH) || fs.mkdirSync(TEMP_PATH), helper.existsSync(FIRMWARE_PATH) && fs.unlinkSync(FIRMWARE_PATH), fs.appendFileSync(FIRMWARE_PATH, new Buffer(e))
+                    helper.existsSync(TEMP_PATH) || fs.mkdirSync(TEMP_PATH), helper.existsSync(FIRMWARE_PATH) && fs.unlinkSync(FIRMWARE_PATH), fs.appendFileSync(FIRMWARE_PATH, Buffer.from(e))
                 } catch (e) {
                     return !1
                 }

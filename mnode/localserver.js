@@ -13,7 +13,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
     ROUTER = _require2.ROUTER,
     LocalServer = function() {
         function r(e) {
-            (0, _classCallCheck2.default)(this, r), this.host = getNetInterface().address, this.port = e || 34433, this.serverPath = ROUTER.LOCAL_SERVER_PATH, this.createDir()
+            (0, _classCallCheck2.default)(this, r), this.host = getNetInterface().address || "127.0.0.1", this.port = e || 34433, this.serverPath = ROUTER.LOCAL_SERVER_PATH, this.createDir()
         }
         return (0, _createClass2.default)(r, [{
             key: "createDir",

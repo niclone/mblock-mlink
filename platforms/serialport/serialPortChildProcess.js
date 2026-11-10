@@ -25,12 +25,15 @@ function _objectSpread(r) {
     return r
 }
 var serialport = require("serialport"),
+    SerialPortBinding = serialport.SerialPort,
     logger = require("../../logger"),
     SerialPort = null,
     currentPort = null,
     connect = function(e, r) {
         var o = e.port;
-        currentPort = o, delete e.port, (SerialPort = new serialport(o, e)).on("open", function() {
+        currentPort = o, delete e.port, (SerialPort = new SerialPortBinding(Object.assign({}, e, {
+            path: o
+        }))).on("open", function() {
             process.send({
                 method: "open",
                 messageId: r,
@@ -80,7 +83,7 @@ process.on("message", function(e) {
             }))
         });
         if ("write" === e.cmd) {
-            var o = new Buffer(e.data);
+            var o = Buffer.from(e.data);
             logger.debug("-> port write", o), SerialPort.write(o, e.encode), SerialPort.drain(function(e) {
                 process.send(_objectSpread({}, r, {
                     error: e
