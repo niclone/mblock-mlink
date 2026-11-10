@@ -21,11 +21,17 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
         }, {
             key: "getDevices",
             value: function(e) {
-                return commendStack.push([this.scanningEnble.bind(this), this]), process.send({
-                    method: "getDevices",
-                    connectName: e.tag,
-                    data: this.peripheralList
-                })
+                var r = this;
+                if (commendStack.push([this.scanningEnble.bind(this), this]), !this.getDevicesTimer) {
+                    var t = 0;
+                    this.getDevicesTimer = setInterval(function() {
+                        t++, r.poweredOn && !r.scanningAble && r.scanningEnble(), process.send({
+                            method: "getDevices",
+                            connectName: e.tag,
+                            data: r.peripheralList
+                        }), 5 <= t && (clearInterval(r.getDevicesTimer), r.getDevicesTimer = null)
+                    }, 1e3)
+                }
             }
         }, {
             key: "open",
@@ -56,7 +62,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
                         case 13:
                             e.prev = 13, e.t0 = e.catch(1), delete bleConnectedList[t.port], process.send({
                                 method: "open",
-                                error: e.t0,
+                                error: e.t0 && e.t0.message ? e.t0.message : String(e.t0),
                                 connectName: t.port
                             });
                         case 17:

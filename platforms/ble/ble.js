@@ -31,7 +31,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
         }, {
             key: "clear",
             value: function(e) {
-                this.messageChannelHandleMap[e] && (this.messageChannelHandleMap[e] = []), this.messageChannelHandleTimeOutMap[e] && (this.messageChannelHandleTimeOutMap[e] = [])
+                delete this.messageChannelHandleMap[e], delete this.messageChannelHandleTimeOutMap[e]
             }
         }, {
             key: "_GC",
@@ -55,7 +55,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
             key: "executeCmd",
             value: function(e, t) {
                 var n = e.getOptions();
-                switch (this.bleParams = e.getParams(), n.hasOwnProperty("port") && (this.bleOption.port = n.port), msgChannel.push(t.messageId, t), this.response = t, (this.request = e).Body.cmd) {
+                switch (this.bleParams = e.getParams(), n.hasOwnProperty("port") && (this.bleOption.port = n.port), this.response = t, (this.request = e).Body.cmd) {
                     case "getDevices":
                         return this.doGetDevices(t);
                     case "open":
@@ -79,11 +79,10 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
                     r = setInterval(function() {
                         var e = msgChannel.pop(s.messageId);
                         if (e) {
-                            clearInterval(r);
                             var t = [];
                             if (e.hasOwnProperty("data"))
                                 for (var n in e.data) t.push(e.data[n]);
-                            return s.reply(null, t)
+                            if (t.length) return clearInterval(r), s.reply(null, t)
                         }
                         if (6e3 < (new Date).getTime() - a) return clearInterval(r), s.reply(null, [])
                     }, 300)
@@ -110,7 +109,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
                     data: s.data,
                     port: n.port,
                     encode: "utf-8"
-                }), logger.debug("> ".concat(t.io.id, ": -> [Write]"), new Buffer(s.data)), t.reply(null)
+                }), logger.debug("> ".concat(t.io.id, ": -> [Write]"), Buffer.from(s.data)), t.reply(null)
             }
         }, {
             key: "doOpen",
@@ -120,7 +119,11 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
                     a = t.io.id,
                     r = s.port,
                     i = ROUTER.CONNECT_TYPE.BLE;
-                this.listenEvents[r] || (this.listenEvents[r] = {}), this.listenEvents[r][a] = function(e) {
+                logger.debug("BLE open", r, JSON.stringify({
+                    serviceUUID: s.serviceUUID,
+                    writeProperty: s.writeProperty,
+                    notifyProperty: s.notifyProperty
+                })), this.listenEvents[r] || (this.listenEvents[r] = {}), this.listenEvents[r][a] = function(e) {
                     try {
                         switch (e.method) {
                             case "disconnect":
@@ -139,7 +142,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
                     } catch (e) {
                         logger.debug("eventCallbak catch:", e)
                     }
-                }, channel.withPlatformsConnect(a, this.getBleTarget(), this.pf), this.processSendSomething(this.pf, {
+                }, this.getPF(), channel.withPlatformsConnect(a, this.getBleTarget(), this.pf), this.processSendSomething(this.pf, {
                     cmd: "open",
                     options: {
                         writeProperty: s.writeProperty,
@@ -148,14 +151,13 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
                     },
                     port: r,
                     timeout: 6e3
-                }), msgChannel.clear(t.messageId);
+                });
                 var l = (new Date).getTime(),
                     o = setInterval(function() {
                         var e = msgChannel.pop(t.messageId);
-                        if (logger.debug("get open data", e), 6e3 < (new Date).getTime() - l && (clearInterval(o), n.kill(), t.reply("timeout", {})), e) {
-                            if (clearInterval(o), e.error) return n.kill();
-                            t.reply(e.error, e)
-                        } else t.reply(null, {})
+                        if (logger.debug("get open data", e), e && "open" === e.method) {
+                            clearInterval(o), e.error ? (n.kill(), t.reply(e.error.message || e.error, {})) : t.reply(null, e)
+                        } else if (6e3 < (new Date).getTime() - l) clearInterval(o), n.kill(), t.reply("timeout", {})
                     }, 300)
             }
         }, {
@@ -177,7 +179,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
                             return void
 
                             function() {
-                                if (logger.debug("listenEvents", i.listenEvents), logger.debug("> on('".concat(r.method, "')"), r.data ? new Buffer(r.data) : r), !r.hasOwnProperty("connectName"))
+                                if (logger.debug("listenEvents", i.listenEvents), logger.debug("> on('".concat(r.method, "')"), r.data ? Buffer.from(r.data) : r), !r.hasOwnProperty("connectName"))
                                     for (var e in i.listenEvents) {
                                         var t = i.listenEvents[e];
                                         for (var n in "disconnect" !== r.method && "close" !== r.method && "error" !== r.method || delete i.listenEvents[e], t) t[n](r)
